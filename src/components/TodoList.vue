@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import TodoListItem from './TodoListItem.vue'
-  import { reactive, ref, computed, nextTick } from 'vue'
+  import { reactive, ref, computed, nextTick, watch } from 'vue'
+  // import * as fundebug from "fundebug-javascript";
 // 响应式基础
   // const count = ref(0)
   // console.log(count);
@@ -30,19 +31,35 @@
   const state:any = reactive({ count: 0 }) 
   // let res:any = reactive([])  // reactive响应式数组
   let resValue:any = ref([])  // ref响应式变量
-  let data:any = ''
-  let selectData:any = ref('')
-  let selectType = ''
+  let inputData:any = ref({value:'',color:''})
+  let todoData:any = ref([
+    {
+      name: '短期',
+      value: 'short'
+    },{
+      name: '中期',
+      value: 'medium'
+    },{
+      name: '长期',
+      value: 'long'
+    }
+  ])
+  let checkedState:any = ref([false,false,false])
+  let bgColor:any = {
+    '0': 'green',
+    '1': 'yellow',
+    '2': 'red'
+  }
   function num() {
     state.count++
   }
   // reactive响应式数组写法
   // function add() {
-  //   if(!data) {
+  //   if(!inputData) {
   //     return
   //   }
-  //   console.log('数据', data);
-  //   res.push(data)
+  //   console.log('数据', inputData);
+  //   res.push(inputData)
   //   console.log(res);
   // }
   // function min() {
@@ -57,11 +74,13 @@
   // }
   // ref响应式变量写法
   function add() {
-    if(!data) {
+    console.log('add');
+    // fundebug.test() // fundebug日志监控
+    if(!inputData.value) {
       alert('请输入数据')
       return
     }
-    resValue.value.push(data)
+    resValue.value.push(JSON.parse(JSON.stringify(inputData.value)))
   }
   function min() {
     if(!resValue) {
@@ -73,9 +92,23 @@
     // resValue.value = []
     resValue.value.length = 0
   }
-  function selectState(type) {
-    console.log('type',type);
-    selectType = type
+  function chcekRadio(this: any, index: string | number) {
+    console.log('index',index);
+    this.checkedState.forEach((ele: any,i: string | number) => {
+      if(index == i) {
+        this.checkedState[index] = !ele
+      } else {
+        this.checkedState[i] = false
+      }
+    });
+    for(let item in bgColor) {
+      console.log(item);
+      if(String(index) === item) {
+        inputData.value.color = bgColor[item]
+      }
+    }
+    console.log('this.checkedState',this.checkedState);
+    console.log(inputData.value.color);
   }
 // 计算属性
   const author = reactive({
@@ -86,24 +119,6 @@
   const publishedTodolist = computed(() => {
     return author.list.length > 0 ? 'yes':'no' 
   })
-  let colorList = []
-  let color = {
-    '0': 'red',
-    '1': 'yellow',
-    '2': 'green'
-  }
-  function bgcolor(indexType) {
-    console.log('indexType',indexType);
-    for(let i in color) {
-      if(selectType === i ) {
-        colorList[indexType] = color[i]
-      }
-    }
-    console.log('colorList',colorList);
-    return colorList[indexType]
-  }
-  
-
 </script>
 <template>
   <!-- {{ ob.foo + 1 }}
@@ -115,10 +130,12 @@
       {{ state.count }}
     </button> -->
     <br>
-    <input type="text" v-model="data">
-    <input type="checkbox"  @click="selectState('0')" id="default">短期
-    <input type="checkbox"  @click="selectState('1')" id="common">中期
-    <input type="checkbox"  @click="selectState('2')" id="waring">长期
+    <input type="text" v-model="inputData.value"><br>
+    <div v-for="(item,index) in todoData" :key="index" >
+      <div @click="chcekRadio(index)">
+        <input type="radio" :value=item.value  :checked="checkedState[index]"><label>{{ item.name }}</label>
+      </div>
+    </div>
     <br>
     <button @click="add()">
       增加
@@ -135,7 +152,7 @@
       <div>-----</div>
     </div> -->
     <div class='todo' v-for="(item,index) in resValue" :key="index">
-      <div class='todo-item' :class="bgcolor(index)">{{ item }}</div>
+      <div class='todo-item' :class="item.color">{{ item.value }}</div>
     </div>
   </div>
   <!-- <TodoListItem>
@@ -150,7 +167,6 @@
  .todo-item {
   height: 100%;
   width: 100%;
-  border: 1px solid black;
  }
  .red {
   background-color: crimson;

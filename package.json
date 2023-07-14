@@ -11,6 +11,8 @@
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false"
   },
   "dependencies": {
+    "fundebug-javascript": "^2.8.8",
+    "fundebug-vue": "^0.3.6",
     "vue": "^3.3.4"
   },
   "devDependencies": {
